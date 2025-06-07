@@ -13,18 +13,27 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
 enum AwsType  {
   mega
   mini
   micro
 }
 
+//Master Role
 model Role {
   id              Int @id  @default(autoincrement())
   name            String @unique
   description     String
-  users User[]
+  users           User[]    // One-To-Many
+
+
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
 }
+
+
+
 model User {
   id              Int     @id @default(autoincrement())
   full_name       String?
@@ -32,7 +41,7 @@ model User {
   email           String  @unique
   password        String  
   mobile_number   String  @unique
-  aws_type        AwsType
+  aws_type        AwsType?
   aws_date        DateTime?
   no_of_site      Int?
 
@@ -41,14 +50,71 @@ model User {
 
   parent_id        Int?
   parent          User? @relation("SubUsers",fields: [parent_id],references: [id])
+
   sub_users       User[] @relation("SubUsers")
 
+  sites           Site[]  // One-To-Many
+
+  zones           Zone[]  //One-To-Many
+
   status          String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+}
+
+//Master Zone
+model Zone {
+  id                Int @id
+  refrence_name     String
+  actual_name       String
+
+  user_id           Int
+  user              User @relation(fields: [user_id],references: [id])
+
+  sites             Site[]  // One-To-Many
+
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+}
+
+model Site {
+  id                  Int @id @default(autoincrement())
+  reference_name      String
+  actual_name         String
+  aws_type            AwsType
+
+  user_id             Int
+  user                User @relation(fields: [user_id],references: [id])
+
+  zone_id             Int?
+  zone                Zone? @relation(fields: [zone_id],references: [id]) 
+
+  site_detail         Sitedetail? // One-To-One
+
+  ward                String
+  site_aws_type       String        
+
+
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt       
 }
 
 
-model Site {
-  
+model Sitedetail {
+  id                  Int   @id @default(autoincrement())
+  site_id             Int   @unique
+  site                Site  @relation(fields: [site_id],references: [id])
+  site_aws_concept    String
+  ftp_img_prefix      String
+  pc_serial_num       String
+  sim_network         String
+  sim_number          String
+  anydesk             String
+  machine_reg_no      String
+  software_version    String
+  location            Json?
+
+
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
 }
