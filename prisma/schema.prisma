@@ -48,18 +48,21 @@ model User {
   role_id         Int
   role            Role @relation(fields: [role_id],references: [id])
 
-  parent_id        Int?
+  parent_id       Int?
   parent          User? @relation("SubUsers",fields: [parent_id],references: [id])
-
+  need_user_limit Boolean @default(false)
+  sub_user_limit  Int?
   sub_users       User[] @relation("SubUsers")
 
   sites           Site[]  // One-To-Many
 
   zones           Zone[]  //One-To-Many
 
+  rf_entries      RfEntry[] // One-To-Many
+
   status          String?
-  created_at       DateTime @default(now())
-  updated_at       DateTime @updatedAt
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
 }
 
 //Master Zone
@@ -73,6 +76,7 @@ model Zone {
 
   sites             Site[]  // One-To-Many
 
+  rf_entries        RfEntry[] // One-To-Many
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt
 }
@@ -89,12 +93,12 @@ model Site {
   zone_id             Int?
   zone                Zone? @relation(fields: [zone_id],references: [id]) 
 
-  site_detail         Sitedetail? // One-To-One
-
+  site_detail_id      Int @unique  // One-To-One without site details site cant create
+  site_detail         Sitedetail @relation(fields: [site_detail_id],references: [id])
   ward                String
   site_aws_type       String        
 
-
+  rf_entries          RfEntry[] // One-To-Many
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt       
 }
@@ -102,8 +106,7 @@ model Site {
 
 model Sitedetail {
   id                  Int   @id @default(autoincrement())
-  site_id             Int   @unique
-  site                Site  @relation(fields: [site_id],references: [id])
+  site                Site?
   site_aws_concept    String
   ftp_img_prefix      String
   pc_serial_num       String
@@ -117,4 +120,44 @@ model Sitedetail {
 
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt
+}
+
+
+model RfEntry {
+  id              Int @id @default(autoincrement())
+  imei            String?
+  vehicle_no      String?
+  rf_id           String?
+  entry_dt        DateTime?
+
+  user_id         Int
+  user            User @relation(fields: [user_id],references: [id]) 
+
+  site_id         Int
+  site            Site  @relation(fields: [site_id],references: [id])
+
+  zone_id         Int?
+  zone            Zone? @relation(fields: [zone_id],references: [id])
+
+  entry_detail_id Int @unique
+  entry_detail    RfEntryDetail @relation(fields: [entry_detail_id],references: [id])
+}
+
+
+model RfEntryDetail {
+  id                Int @id @default(autoincrement())
+  rf_entry          RfEntry?
+  empty_weight      String?//Float
+  weight_per_kg     String?//Float
+  reference_value   String?//Float
+  max_weight        String?//Float
+  vehicle_type      String?
+  cat               String?
+  status            String?
+  b_mcc             String?
+  d_yard            String?
+  over_weight       String?//Float
+  intime_limit      DateTime?
+  out_time_limit    DateTime?
+  temp_vehicle      String?
 }
