@@ -21,11 +21,11 @@ enum AwsType  {
 }
 
 //Master Role
-model Role {
+model Roles {
   id              Int @id  @default(autoincrement())
   name            String @unique
   description     String
-  users           User[]    // One-To-Many
+  users           Users[]    // One-To-Many
 
 
   created_at       DateTime @default(now())
@@ -34,7 +34,7 @@ model Role {
 
 
 
-model User {
+model Users {
   id              Int     @id @default(autoincrement())
   full_name       String?
   username        String  @unique
@@ -46,19 +46,19 @@ model User {
   no_of_site      Int?
 
   role_id         Int
-  role            Role @relation(fields: [role_id],references: [id])
+  role            Roles @relation(fields: [role_id],references: [id])
 
   parent_id       Int?
-  parent          User? @relation("SubUsers",fields: [parent_id],references: [id])
+  parent          Users? @relation("SubUsers",fields: [parent_id],references: [id])
   need_user_limit Boolean @default(false)
   sub_user_limit  Int?
-  sub_users       User[] @relation("SubUsers")
+  sub_users       Users[] @relation("SubUsers")
 
-  sites           Site[]  // One-To-Many
+  sites           Sites[]  // One-To-Many
 
-  zones           Zone[]  //One-To-Many
+  zones           Zones[]  //One-To-Many
 
-  rf_entries      RfEntry[] // One-To-Many
+  rf_entries      RfEntries[] // One-To-Many
 
   status          String?
   created_at      DateTime @default(now())
@@ -66,47 +66,47 @@ model User {
 }
 
 //Master Zone
-model Zone {
+model Zones {
   id                Int @id
   refrence_name     String
   actual_name       String
 
   user_id           Int
-  user              User @relation(fields: [user_id],references: [id])
+  user              Users @relation(fields: [user_id],references: [id])
 
-  sites             Site[]  // One-To-Many
+  sites             Sites[]  // One-To-Many
 
-  rf_entries        RfEntry[] // One-To-Many
+  rf_entries        RfEntries[] // One-To-Many
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt
 }
 
-model Site {
+model Sites {
   id                  Int @id @default(autoincrement())
   reference_name      String
   actual_name         String
   aws_type            AwsType
 
   user_id             Int
-  user                User @relation(fields: [user_id],references: [id])
+  user                Users @relation(fields: [user_id],references: [id])
 
   zone_id             Int?
-  zone                Zone? @relation(fields: [zone_id],references: [id]) 
+  zone                Zones? @relation(fields: [zone_id],references: [id]) 
 
   site_detail_id      Int @unique  // One-To-One without site details site cant create
-  site_detail         Sitedetail @relation(fields: [site_detail_id],references: [id])
+  site_detail         Sitedetails @relation(fields: [site_detail_id],references: [id])
   ward                String
   site_aws_type       String        
 
-  rf_entries          RfEntry[] // One-To-Many
+  rf_entries          RfEntries[] // One-To-Many
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt       
 }
 
 
-model Sitedetail {
+model Sitedetails {
   id                  Int   @id @default(autoincrement())
-  site                Site?
+  site                Sites?
   site_aws_concept    String
   ftp_img_prefix      String
   pc_serial_num       String
@@ -123,7 +123,7 @@ model Sitedetail {
 }
 
 
-model RfEntry {
+model RfEntries {
   id              Int @id @default(autoincrement())
   imei            String?
   vehicle_no      String?
@@ -131,22 +131,22 @@ model RfEntry {
   entry_dt        DateTime?
 
   user_id         Int
-  user            User @relation(fields: [user_id],references: [id]) 
+  user            Users @relation(fields: [user_id],references: [id]) 
 
   site_id         Int
-  site            Site  @relation(fields: [site_id],references: [id])
+  site            Sites  @relation(fields: [site_id],references: [id])
 
   zone_id         Int?
-  zone            Zone? @relation(fields: [zone_id],references: [id])
+  zone            Zones? @relation(fields: [zone_id],references: [id])
 
   entry_detail_id Int @unique
-  entry_detail    RfEntryDetail @relation(fields: [entry_detail_id],references: [id])
+  entry_detail    RfEntryDetails @relation(fields: [entry_detail_id],references: [id])
 }
 
 
-model RfEntryDetail {
+model RfEntryDetails {
   id                Int @id @default(autoincrement())
-  rf_entry          RfEntry?
+  rf_entry          RfEntries?
   empty_weight      String?//Float
   weight_per_kg     String?//Float
   reference_value   String?//Float
