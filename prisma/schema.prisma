@@ -25,245 +25,242 @@ enum AwsType  {
 
 //Master Role
 model Roles {
-  id              Int @id  @default(autoincrement())
-  name            String @unique
-  description     String
-  users           Users[]    // One-To-Many
+  id                        Int       @id  @default(autoincrement())
+  name                      String    @unique
+  description               String
+  users                     Users[]    // One-To-Many
 
-
-  created_at       DateTime @default(now())
-  updated_at       DateTime @updatedAt
+  created_at                DateTime  @default(now())
+  updated_at                DateTime  @updatedAt
 }
 
 
 model Users {
-  id              Int     @id @default(autoincrement())
-  full_name       String?
-  username        String  @unique
-  email           String  @unique
-  password        String  
-  mobile_number   String  @unique
-  aws_type        AwsType?
-  aws_date        DateTime?
-  no_of_site      Int?
+  id                        Int       @id @default(autoincrement())
+  full_name                 String?
+  username                  String    @unique
+  email                     String    @unique
+  password                  String  
+  mobile_number             String    @unique
+  aws_type                  AwsType?
+  aws_date                  DateTime?
+  no_of_site                Int?
+          
+  role_id                   Int
+  role                      Roles     @relation(fields: [role_id],references: [id])
+          
+  parent_id                 Int?
+  parent                    Users?    @relation("SubUsers",fields: [parent_id],references: [id])
+  need_user_limit           Boolean   @default(false)
+  sub_user_limit            Int?
+  sub_users                 Users[]   @relation("SubUsers")
+          
+  site_access               SiteAccess[]  //Many-to-Many
+          
+  zones                     Zones[]  //One-To-Many
+          
+  rf_entries                RfEntries[] // One-To-Many
+          
+  aws_logs                  AwsLogs[]
 
-  role_id         Int
-  role            Roles @relation(fields: [role_id],references: [id])
-
-  parent_id       Int?
-  parent          Users? @relation("SubUsers",fields: [parent_id],references: [id])
-  need_user_limit Boolean @default(false)
-  sub_user_limit  Int?
-  sub_users       Users[] @relation("SubUsers")
-
-  site_access     SiteAccess[]  //Many-to-Many
-
-  zones           Zones[]  //One-To-Many
-
-  rf_entries      RfEntries[] // One-To-Many
-
-  aws_logs         AwsLogs[]
-
-  status          String?
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+  status                    String?
+  created_at                DateTime  @default(now())
+  updated_at                DateTime  @updatedAt
 }
 
 
 //Master Zone
 model Zones {
-  id                Int @id
-  refrence_name     String
-  actual_name       String
+  id                        Int       @id @default(autoincrement())
+  refrence_name             String
+  actual_name               String
 
-  user_id           Int
-  user              Users @relation(fields: [user_id],references: [id])
+  user_id                   Int
+  user                      Users     @relation(fields: [user_id],references: [id])
 
-  sites             Sites[]  // One-To-Many
+  sites                     Sites[]  // One-To-Many
 
-  rf_entries        RfEntries[] // One-To-Many
+  rf_entries                RfEntries[] // One-To-Many
 
-  aws_logs          AwsLogs[]
-  created_at       DateTime @default(now())
-  updated_at       DateTime @updatedAt
+  aws_logs                  AwsLogs[]
+  created_at                DateTime  @default(now())
+  updated_at                DateTime  @updatedAt
 }
 
 
 model SiteAccess {
-  id              Int    @id @default(autoincrement())
-  user            Users  @relation(fields: [user_id], references: [id])
-  user_id         Int
+  id                        Int       @id @default(autoincrement())
+  user                      Users     @relation(fields: [user_id], references: [id])
+  user_id                   Int
 
-  site            Sites  @relation(fields: [site_id], references: [id])
-  site_id         Int
+  site                      Sites     @relation(fields: [site_id], references: [id])
+  site_id                   Int
 
-  access_role     String? // optional: "owner", "editor", "viewer"
-  assigned_by     Int?    // optional: who assigned it
+  access_role               String? // optional: "owner", "editor", "viewer"
+  assigned_by               Int?    // optional: who assigned it
 
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+  created_at                DateTime  @default(now())
+  updated_at                DateTime  @updatedAt
 }
 
 
 model Sites {
-  id                  Int @id @default(autoincrement())
-  reference_name      String
-  actual_name         String
-  aws_type            AwsType
+  id                        Int       @id @default(autoincrement())
+  reference_name            String
+  actual_name               String
+  aws_type                  AwsType
 
-  site_access         SiteAccess[] //Many-to-Many
+  site_access               SiteAccess[] //Many-to-Many
 
-  zone_id             Int?
-  zone                Zones? @relation(fields: [zone_id],references: [id]) 
+  zone_id                   Int?
+  zone                      Zones?    @relation(fields: [zone_id],references: [id]) 
 
-  site_detail_id      Int @unique  // One-To-One without site details site cant create
-  site_detail         Sitedetails @relation(fields: [site_detail_id],references: [id])
-  ward                String
-  site_aws_type       String        
+  site_detail_id            Int       @unique  // One-To-One without site details site cant create
+  site_detail               Sitedetails @relation(fields: [site_detail_id],references: [id])
+  ward                      String
+  site_aws_type             String        
 
-  rf_entries          RfEntries[] // One-To-Many
+  rf_entries                RfEntries[] // One-To-Many
 
-  aws_logs            AwsLogs[]
+  aws_logs                  AwsLogs[]
 
-  created_at       DateTime @default(now())
-  updated_at       DateTime @updatedAt       
+  created_at                DateTime  @default(now())
+  updated_at                DateTime  @updatedAt       
 }
 
 
 model Sitedetails {
-  id                  Int   @id @default(autoincrement())
-  site                Sites?
-  site_aws_concept    String
-  ftp_img_prefix      String
-  pc_serial_num       String
-  sim_network         String
-  sim_number          String
-  anydesk             String
-  machine_reg_no      String
-  software_version    String
-  location            Json?
+  id                        Int       @id @default(autoincrement())
+  site                      Sites?
+  site_aws_concept          String
+  ftp_img_prefix            String
+  pc_serial_num             String
+  sim_network               String
+  sim_number                String
+  anydesk                   String
+  machine_reg_no            String
+  software_version          String
+  location                  Json?
 
-
-  created_at       DateTime @default(now())
-  updated_at       DateTime @updatedAt
+  created_at                DateTime  @default(now())
+  updated_at                DateTime  @updatedAt
 }
 
 
 model RfEntries {
-  id              Int @id @default(autoincrement())
-  imei            String?
-  vehicle_no      String?
-  rf_id           String?
-  entry_dt        DateTime?
+  id                        Int       @id @default(autoincrement())
+  imei                      String?
+  vehicle_no                String?
+  rf_id                     String?
+  entry_dt                  DateTime?
 
-  user_id         Int
-  user            Users @relation(fields: [user_id],references: [id]) 
+  user_id                   Int
+  user                      Users     @relation(fields: [user_id],references: [id]) 
 
-  site_id         Int
-  site            Sites  @relation(fields: [site_id],references: [id])
+  site_id                   Int
+  site                      Sites     @relation(fields: [site_id],references: [id])
 
-  zone_id         Int?
-  zone            Zones? @relation(fields: [zone_id],references: [id])
+  zone_id                   Int?
+  zone                      Zones?    @relation(fields: [zone_id],references: [id])
 
-  entry_detail_id Int @unique
-  entry_detail    RfEntryDetails @relation(fields: [entry_detail_id],references: [id])
+  entry_detail_id           Int       @unique
+  entry_detail              RfEntryDetails @relation(fields: [entry_detail_id],references: [id])
 
-  created_at       DateTime @default(now())
-  updated_at       DateTime @updatedAt
+  created_at                DateTime @default(now())
+  updated_at                DateTime @updatedAt
 }
 
 
 model RfEntryDetails {
-  id                Int @id @default(autoincrement())
-  rf_entry          RfEntries?
-  empty_weight      String?//Float
-  weight_per_kg     String?//Float
-  reference_value   String?//Float
-  max_weight        String?//Float
-  vehicle_type      String?
-  cat               String?
-  status            String?
-  b_mcc             String?
-  d_yard            String?
-  over_weight       String?//Float
-  intime_limit      DateTime?
-  out_time_limit    DateTime?
-  temp_vehicle      String?
+  id                        Int     @id @default(autoincrement())
+  rf_entry                  RfEntries?
+  empty_weight              String?//Float
+  weight_per_kg             String?//Float
+  reference_value           String?//Float
+  max_weight                String?//Float
+  vehicle_type              String?
+  cat                       String?
+  status                    String?
+  b_mcc                     String?
+  d_yard                    String?
+  over_weight               String?//Float
+  intime_limit              DateTime?
+  out_time_limit            DateTime?
+  temp_vehicle              String?
 
-
-  created_at       DateTime @default(now())
-  updated_at       DateTime @updatedAt
+  created_at                DateTime @default(now())
+  updated_at                DateTime @updatedAt
 }
 
 
 model AwsLogs {
-  id                Int       @id @default(autoincrement())
-  user_id           Int
-  user              Users @relation(fields: [user_id],references: [id])
-  site_id           Int
-  site              Sites @relation(fields: [site_id],references: [id])
-  zone_id           Int
-  zone              Zones @relation(fields: [zone_id],references: [id])
-  ward              String?
-
-  imei              String
-  vehicle_no        String
-  rf_id             String
-
-  empty_weight      Float
-  weight_in         Float
-  weight_out        Float
-  
-  date_in           DateTime //entry-in-date and time
-  date_out          DateTime
-  status            String
-  in_status         String
-  out_status        String
-
-  general_details   AwsLogGeneralDetails?
-  in_images         AwsLogInImages?
-  out_images        AwsLogOutImages?
-  
-  created_at        DateTime  @default(now())   //dt(data stored in db, date and time)
-  updated_at        DateTime  @updatedAt
+  id                        Int       @id @default(autoincrement())
+  user_id                   Int
+  user                      Users     @relation(fields: [user_id],references: [id])
+  site_id                   Int
+  site                      Sites     @relation(fields: [site_id],references: [id])
+  zone_id                   Int
+  zone                      Zones     @relation(fields: [zone_id],references: [id])
+  ward                      String?
+        
+  imei                      String
+  vehicle_no                String
+  rf_id                     String
+        
+  empty_weight              Float
+  weight_in                 Float
+  weight_out                Float
+          
+  date_in                   DateTime //entry-in-date and time
+  date_out                  DateTime
+  status                    String
+  in_status                 String
+  out_status                String
+        
+  general_details           AwsLogGeneralDetails?
+  in_images                 AwsLogInImages?
+  out_images                AwsLogOutImages?
+          
+  created_at                DateTime  @default(now())   //dt(data stored in db, date and time)
+  updated_at                DateTime  @updatedAt
 }
 
 
 model AwsLogGeneralDetails  {
-  id                  Int       @id @default(autoincrement())
-  awslog_in           Int       @unique
-  awslog              AwsLogs   @relation(fields: [awslog_in],references: [id])
-  hash_value          String
-  trip                String
-  trip_km             String
-  trip_missed_assign  String
-  b_mcc               String
-  d_yard              String
-  cat                 String
-  out_auto_alert      String
-  delay_assign        String
-  to_ear_assign       String
-  overload_assign     String
-  coordinates         Json?
+  id                        Int       @id @default(autoincrement())
+  awslog_id                 Int       @unique
+  awslog                    AwsLogs   @relation(fields: [awslog_id],references: [id])
+  hash_value                String
+  trip                      String
+  trip_km                   String
+  trip_missed_assign        String
+  b_mcc                     String
+  d_yard                    String
+  cat                       String
+  out_auto_alert            String
+  delay_assign              String
+  to_ear_assign             String
+  overload_assign           String
+  coordinates               Json?
 }
 
 model AwsLogInImages {
-  id              Int       @id @default(autoincrement())
-  awslog_id       Int       @unique
-  awslog          AwsLogs   @relation(fields: [awslog_id],references: [id])
-  front_in        String
-  back_in         String
-  left_in         String
-  right_in        String
+  id                        Int       @id @default(autoincrement())
+  awslog_id                 Int       @unique
+  awslog                    AwsLogs   @relation(fields: [awslog_id],references: [id])
+  front_in                  String
+  back_in                   String
+  left_in                   String
+  right_in                  String
 
 }
 
 model AwsLogOutImages {
-  id              Int       @id @default(autoincrement())
-  awslog_id       Int       @unique
-  awslog          AwsLogs   @relation(fields: [awslog_id],references: [id])
-  front_out       String
-  back_out        String
-  left_out        String
-  right_out       String
+  id                        Int       @id @default(autoincrement())
+  awslog_id                 Int       @unique
+  awslog                    AwsLogs   @relation(fields: [awslog_id],references: [id])
+  front_out                 String
+  back_out                  String
+  left_out                  String
+  right_out                 String
 }
