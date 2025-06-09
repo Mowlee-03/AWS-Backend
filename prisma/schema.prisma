@@ -198,14 +198,10 @@ model RfEntryDetails {
 
 model AwsLogs {
   id                Int       @id @default(autoincrement())
-  created_at        DateTime  @default(now())   //dt(data stored in db date and time)
-
   user_id           Int
   user              Users @relation(fields: [user_id],references: [id])
-
   site_id           Int
   site              Sites @relation(fields: [site_id],references: [id])
-
   zone_id           Int
   zone              Zones @relation(fields: [zone_id],references: [id])
   ward              String?
@@ -215,46 +211,59 @@ model AwsLogs {
   rf_id             String
 
   empty_weight      Float
-  weight            Float
+  weight_in         Float
   weight_out        Float
-
-  date              DateTime //entry-date
+  
+  date_in           DateTime //entry-in-date and time
+  date_out          DateTime
   status            String
+  in_status         String
+  out_status        String
 
-  hash_value        String
-  trip              String
-  trip_km           String
-  trip_missed_assign  String
-  b_mcc             String
-  d_yard            String
-  cat               String
-  out_auto_alert    String
-  delay_assign      String
-  to_ear_assign     String
-  overload_assign   String
-  coordinates       Json?
-
+  general_details   AwsLogGeneralDetails?
+  in_images         AwsLogInImages?
+  out_images        AwsLogOutImages?
+  
+  created_at        DateTime  @default(now())   //dt(data stored in db, date and time)
   updated_at        DateTime  @updatedAt
 }
 
-model AwsLogInDetails {
-  id              Int     @id
-  // log_id       Int
-  // awslog       AwsLogs 
+
+model AwsLogGeneralDetails  {
+  id                  Int       @id @default(autoincrement())
+  awslog_in           Int       @unique
+  awslog              AwsLogs   @relation(fields: [awslog_in],references: [id])
+  hash_value          String
+  trip                String
+  trip_km             String
+  trip_missed_assign  String
+  b_mcc               String
+  d_yard              String
+  cat                 String
+  out_auto_alert      String
+  delay_assign        String
+  to_ear_assign       String
+  overload_assign     String
+  coordinates         Json?
+}
+
+model AwsLogInImages {
+  id              Int       @id @default(autoincrement())
+  awslog_id       Int       @unique
+  awslog          AwsLogs   @relation(fields: [awslog_id],references: [id])
   front_in        String
   back_in         String
   left_in         String
   right_in        String
-  in_status       String
+
 }
 
-model AwsLogOutDetails {
-  id          Int   @id
-  
-
-  front_out   String
-  back_out    String
-  left_out    String
-  right_out   String
-  out_status  String
+model AwsLogOutImages {
+  id              Int       @id @default(autoincrement())
+  awslog_id       Int       @unique
+  awslog          AwsLogs   @relation(fields: [awslog_id],references: [id])
+  front_out       String
+  back_out        String
+  left_out        String
+  right_out       String
 }
