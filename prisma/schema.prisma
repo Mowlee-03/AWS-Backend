@@ -61,7 +61,7 @@ model Users {
           
   rf_entries                RfEntries[] // One-To-Many
           
-  aws_logs                  AwsLogs[]
+  aws_logs                  AwsLogs[] //One-To-Many
 
   status                    String?
   created_at                DateTime  @default(now())
@@ -252,7 +252,6 @@ model AwsLogInImages {
   back_in                   String
   left_in                   String
   right_in                  String
-
 }
 
 model AwsLogOutImages {
