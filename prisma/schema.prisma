@@ -9,16 +9,19 @@ generator client {
   output   = "../generated/prisma"
 }
 
+
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
 
 enum AwsType  {
   mega
   mini
   micro
 }
+
 
 //Master Role
 model Roles {
@@ -31,7 +34,6 @@ model Roles {
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt
 }
-
 
 
 model Users {
@@ -54,16 +56,19 @@ model Users {
   sub_user_limit  Int?
   sub_users       Users[] @relation("SubUsers")
 
-  sites           Sites[]  // One-To-Many
+  site_access     SiteAccess[]  //Many-to-Many
 
   zones           Zones[]  //One-To-Many
 
   rf_entries      RfEntries[] // One-To-Many
 
+  aws_logs         AwsLogs[]
+
   status          String?
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 }
+
 
 //Master Zone
 model Zones {
@@ -77,9 +82,28 @@ model Zones {
   sites             Sites[]  // One-To-Many
 
   rf_entries        RfEntries[] // One-To-Many
+
+  aws_logs          AwsLogs[]
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt
 }
+
+
+model SiteAccess {
+  id              Int    @id @default(autoincrement())
+  user            Users  @relation(fields: [user_id], references: [id])
+  user_id         Int
+
+  site            Sites  @relation(fields: [site_id], references: [id])
+  site_id         Int
+
+  access_role     String? // optional: "owner", "editor", "viewer"
+  assigned_by     Int?    // optional: who assigned it
+
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+}
+
 
 model Sites {
   id                  Int @id @default(autoincrement())
@@ -87,8 +111,7 @@ model Sites {
   actual_name         String
   aws_type            AwsType
 
-  user_id             Int
-  user                Users @relation(fields: [user_id],references: [id])
+  site_access         SiteAccess[] //Many-to-Many
 
   zone_id             Int?
   zone                Zones? @relation(fields: [zone_id],references: [id]) 
@@ -99,6 +122,9 @@ model Sites {
   site_aws_type       String        
 
   rf_entries          RfEntries[] // One-To-Many
+
+  aws_logs            AwsLogs[]
+
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt       
 }
@@ -141,6 +167,9 @@ model RfEntries {
 
   entry_detail_id Int @unique
   entry_detail    RfEntryDetails @relation(fields: [entry_detail_id],references: [id])
+
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
 }
 
 
@@ -160,4 +189,72 @@ model RfEntryDetails {
   intime_limit      DateTime?
   out_time_limit    DateTime?
   temp_vehicle      String?
+
+
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+}
+
+
+model AwsLogs {
+  id                Int       @id @default(autoincrement())
+  created_at        DateTime  @default(now())   //dt(data stored in db date and time)
+
+  user_id           Int
+  user              Users @relation(fields: [user_id],references: [id])
+
+  site_id           Int
+  site              Sites @relation(fields: [site_id],references: [id])
+
+  zone_id           Int
+  zone              Zones @relation(fields: [zone_id],references: [id])
+  ward              String?
+
+  imei              String
+  vehicle_no        String
+  rf_id             String
+
+  empty_weight      Float
+  weight            Float
+  weight_out        Float
+
+  date              DateTime //entry-date
+  status            String
+
+  hash_value        String
+  trip              String
+  trip_km           String
+  trip_missed_assign  String
+  b_mcc             String
+  d_yard            String
+  cat               String
+  out_auto_alert    String
+  delay_assign      String
+  to_ear_assign     String
+  overload_assign   String
+  coordinates       Json?
+
+  updated_at        DateTime  @updatedAt
+}
+
+model AwsLogInDetails {
+  id              Int     @id
+  // log_id       Int
+  // awslog       AwsLogs 
+  front_in        String
+  back_in         String
+  left_in         String
+  right_in        String
+  in_status       String
+}
+
+model AwsLogOutDetails {
+  id          Int   @id
+  
+
+  front_out   String
+  back_out    String
+  left_out    String
+  right_out   String
+  out_status  String
 }
