@@ -63,6 +63,8 @@ model Users {
           
   aws_logs                  AwsLogs[] //One-To-Many
 
+  aws_micro_logs            AwsMicroLogs[]  // One-To-Many
+
   status                    String?
   created_at                DateTime  @default(now())
   updated_at                DateTime  @updatedAt
@@ -82,7 +84,9 @@ model Zones {
 
   rf_entries                RfEntries[] // One-To-Many
 
-  aws_logs                  AwsLogs[]
+  aws_logs                  AwsLogs[] // One-To-Many
+
+  aws_micro_logs            AwsMicroLogs[] // One-To-Many
   created_at                DateTime  @default(now())
   updated_at                DateTime  @updatedAt
 }
@@ -122,7 +126,9 @@ model Sites {
 
   rf_entries                RfEntries[] // One-To-Many
 
-  aws_logs                  AwsLogs[]
+  aws_logs                  AwsLogs[] // One-To-Many
+
+  aws_micro_logs            AwsMicroLogs[] // One-To-Many
 
   created_at                DateTime  @default(now())
   updated_at                DateTime  @updatedAt       
@@ -262,4 +268,36 @@ model AwsLogOutImages {
   back_out                  String
   left_out                  String
   right_out                 String
+}
+
+model AwsMicroLogs  {
+  id                        Int       @id @default(autoincrement())
+  user_id                   Int
+  user                      Users     @relation(fields: [user_id],references: [id])
+  site_id                   Int
+  site                      Sites     @relation(fields: [site_id],references: [id])
+  zone_id                   Int 
+  zone                      Zones     @relation(fields: [zone_id],references: [id])
+
+  imei                      String
+  vehicle_no                String
+  rf_id                     String
+  trip                      String
+  date                      DateTime
+
+  log_details                  AwsMicroLogDetails?
+  created_at                DateTime   @default(now())
+  updated_at                DateTime   @updatedAt
+}
+
+
+model AwsMicroLogDetails {
+  id                        Int        @id  @default(autoincrement())
+  aws_micro_log_id          Int        @unique
+  aws_micro_log             AwsMicroLogs @relation(fields: [aws_micro_log_id],references: [id])
+
+  data                      Json
+
+  created_at                DateTime   @default(now())
+  updated_at                DateTime   @updatedAt
 }
