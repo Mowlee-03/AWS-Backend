@@ -250,6 +250,7 @@ model AwsLogGeneralDetails  {
   coordinates               Json?
 }
 
+
 model AwsLogInImages {
   id                        Int       @id @default(autoincrement())
   awslog_id                 Int       @unique
@@ -260,6 +261,7 @@ model AwsLogInImages {
   right_in                  String
 }
 
+
 model AwsLogOutImages {
   id                        Int       @id @default(autoincrement())
   awslog_id                 Int       @unique
@@ -269,6 +271,7 @@ model AwsLogOutImages {
   left_out                  String
   right_out                 String
 }
+
 
 model AwsMicroLogs  {
   id                        Int       @id @default(autoincrement())
