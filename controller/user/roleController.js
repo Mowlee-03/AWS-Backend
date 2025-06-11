@@ -74,6 +74,19 @@ const updateRole = async (req, res) => {
           message:"Role not found"
         })
       }
+      const duplicateRole = await prisma.roles.findFirst({
+          where: {
+            name,
+            NOT: { id: Number(id) }, // prevent false positive if updating the same name
+          },
+        });
+
+      if (duplicateRole) {
+        return res.status(409).json({
+          status: 409,
+          message: "Role name already exists",
+        });
+      }
       await prisma.roles.update({
         where: { id: Number(id) },
         data: { 

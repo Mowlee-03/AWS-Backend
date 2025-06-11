@@ -72,7 +72,7 @@ model Users {
 
 //Master Zone
 model Zones {
-  id                        Int       @id @default(autoincrement())
+  id                        Int       @id  @default(autoincrement())
   refrence_name             String
   actual_name               String
 
@@ -165,8 +165,8 @@ model RfEntries {
   site_id                   Int
   site                      Sites     @relation(fields: [site_id],references: [id])
 
-  zone_id                   Int?
-  zone                      Zones?    @relation(fields: [zone_id],references: [id])
+  zone_id                   Int
+  zone                      Zones    @relation(fields: [zone_id],references: [id])
 
   entry_detail_id           Int       @unique
   entry_detail              RfEntryDetails @relation(fields: [entry_detail_id],references: [id])
