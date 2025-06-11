@@ -1,43 +1,48 @@
-const {PrismaClient}=require("@prisma/client")
+const {PrismaClient} = require("@prisma/client")
 const prisma=new PrismaClient()
 
 
-
-const createRoleWithPermissions = async (req, res) => {
+const createRole = async (req, res) => {
   try {
-    const { name, permissionIds } = req.body; // permissionIds = [1, 2, 3]
-
+    const { name,description  } = req.body; 
+    if (!name) {
+      return res.status(400).json({
+        status:400,
+        message:"Name is required for role creation"
+      })
+    }
+    const isExist=await prisma.roles.findUnique({where:{name}})
+    if (isExist) {
+      return res.status(409).json({
+        status:409,
+        message:"Role already exist"
+      })
+    }
     const role = await prisma.roles.create({
-      data: {
+      data:{
         name,
-        permissions: {
-          connect: permissionIds.map((id) => ({ id })),
-        },
-      },
-      include: {
-        permissions: true,
-      },
-    });
+        description
+      }
+    })
 
     res.status(200).json({
       status: 200,
-      message: "Role created successfully with permissions",
+      message: "Role created successfully",
       data:role,
     });
   } catch (error) {
-    console.error(err);
+    console.error(error);
     res.status(500).json({ 
       status:500,
       message:"An internal server error",
       error: error.message 
     });
   }
-};
-
+  };
   
 const getAllRoles = async (req, res) => {
     try {
-      const roles = await prisma.roles.findMany({ include: { permissions: true } });
+      const roles = await prisma.roles.findMany();
       res.status(200).json({
         status:200,
         message:"Fetching roles success",
@@ -55,14 +60,30 @@ const getAllRoles = async (req, res) => {
 const updateRole = async (req, res) => {
     try {
       const { id } = req.params;
-      const { name } = req.body;
+      const { name,description } = req.body;
+      if (!name) {
+        return res.status(400).json({
+          status:400,
+          message:"Name is required"
+        })
+      }
+      const isExist=await prisma.roles.findUnique({where:{id: Number(id)}})
+      if (!isExist) {
+        return res.status(409).json({
+          status:409,
+          message:"Role not found"
+        })
+      }
       await prisma.roles.update({
         where: { id: Number(id) },
-        data: { name }
+        data: { 
+          name,
+          description
+        }
       });
       res.status(200).json({
         status:200,
-        message:"Role name Updated"
+        message:"Role Updated"
       });
     } catch (error) {
       res.status(500).json({
@@ -87,80 +108,13 @@ const deleteRole = async (req, res) => {
   };
   
 
-const updateRoleWithPermissions = async (req, res) => {
-    const { roleId, permissionIds } = req.body;
-  
-    if (!roleId || !Array.isArray(permissionIds)) {
-      return res.status(400).json({ message: "Invalid request data" });
-    }
-  
-    try {
-      // Check if role exists
-      const existingRole = await prisma.roles.findUnique({ where: { id: roleId } });
-      if (!existingRole) {
-        return res.status(404).json({ message: "Role not found" });
-      }
-  
-      // Step 1: Remove all current permissions
-      await prisma.rolesPermissions.deleteMany({ where: { roleId } });
-  
-      // Step 2: Add new permissions
-      const data = permissionIds.map((permissionId) => ({
-        roleId,
-        permissionId,
-      }));
-  
-      await prisma.rolesPermissions.createMany({ data });
-  
-      res.status(200).json({ message: "Permissions updated successfully" });
-    } catch (error) {
-      console.error("Error updating permissions:", error);
-      res.status(500).json({ message: "Internal server error" });
-    }
-  };
-  
-  // RolesPermissions (junction) - assign/remove permission to/from role
-const assignPermissionsToRole = async (req, res) => {
-    try {
-      const { roleId, permissionIds } = req.body; // permissionIds = [1, 2, 3]
-      const data = permissionIds.map(permissionId => ({
-        roleId,
-        permissionId
-      }));
-      const result = await prisma.rolesPermissions.createMany({ data, skipDuplicates: true });
-      res.json(result);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  };
-  
-  
-const removePermissionsFromRole = async (req, res) => {
-    try {
-      const { roleId, permissionIds } = req.body;
-      const deletePromises = permissionIds.map(permissionId =>
-        prisma.rolesPermissions.delete({
-          where: {
-            roleId_permissionId: {
-              roleId,
-              permissionId
-            }
-          }
-        })
-      );
-      await Promise.all(deletePromises);
-      res.json({ message: 'Permissions removed from role' });
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  };
+
   
 
 
 module.exports={
-  createRoleWithPermissions,
+  createRole,
   getAllRoles,
   updateRole,
   deleteRole,
-  updateRoleWithPermissions
 }
