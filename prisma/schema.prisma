@@ -47,7 +47,7 @@ model Users {
           
   role_id                   Int
   role                      Roles     @relation(fields: [role_id],references: [id])
-          
+  isChild                   Boolean   @default(false)        
   parent_id                 Int?
   parent                    Users?    @relation("SubUsers",fields: [parent_id],references: [id])
   need_user_limit           Boolean   @default(false)

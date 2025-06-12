@@ -1,4 +1,4 @@
-const {PrismaClient}=require("@prisma/client");
+const {PrismaClient} = require("@prisma/client");
 const { hashPassword } = require("../../utils/password");
 const prisma=new PrismaClient()
 
@@ -6,38 +6,44 @@ const prisma=new PrismaClient()
 
 // Users CRUD
 const createUser = async (req, res) => {
-    try {
-      const { 
-        email, 
-        username, 
-        password, 
-        roleId, 
+    const { 
+      full_name,username,email,password,mobile_number,aws_type,aws_date,no_of_site,
+      role_id,isChild,parent_id,need_user_limit,sub_user_limit,status
     } = req.body;
-      const isExist=await prisma.findUnique({
-        where:{email}
-      })
-      if (isExist) {
-        return res.status(409).json({
-            status:409,
-            message:"Email already exist"
+    
+    try {
+
+      if (!username || !email || !password || !mobile_number || !role_id) {
+        return res.status(400).json({
+          status:400,
+          message:"Required fields missing"
         })
-    }
-    const hashedPass=hashPassword(password)
-      await prisma.user.create({
-        data: {
-          email,
-          username,
-          password:hashedPass,
-          roleId,
-          departmentid
-        }
-      });
+      }
+
+      if (isChild === true && !parent_id) {
+        return res.status(400).json({
+          status: 400,
+          message: "Main user id is required when its sub user"
+        });
+      }
+
+      if (need_user_limit === true && (!sub_user_limit || sub_user_limit === undefined || sub_user_limit === null)) {
+        return res.status(400).json({
+          status: 400,
+          message: "Enter user limit when you need limit"
+        });
+      }
+
+      const hashedPass=hashPassword(password)
+      await prisma.users.create({
+
+      })
       res.status(200).json({
         status:200,
         message:"User created successfully"
       });
     } catch (error) {
-        console.log(error); 
+      console.log(error); 
       return res.status(500).json({
                 status:500,
                 message:"An internal server error", 
