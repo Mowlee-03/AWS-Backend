@@ -7,21 +7,21 @@ const authMiddleware = async (req, res, next) => {
     const token = req.cookies.authToken;
 
     if (!token) {
-      return res.status(401).json({ message: "No token provided." });
+      return res.status(401).json({ message: "Authentication(token) required" });
     }
 
     const decodedUser = verifyToken(token);
 
     if (!decodedUser || !decodedUser.id) {
-      return res.status(401).json({ message: "Invalid token." });
+      return res.status(401).json({ message: "Authorization failed invalid token." });
     }
 
-    const foundedUser = await prisma.user.findUnique({
+    const foundedUser = await prisma.users.findUnique({
       where: { id: decodedUser.id },
     });
 
     if (!foundedUser) {
-      return res.status(404).json({ message: "User not found." });
+      return res.status(404).json({ message: "Authorization failed user not found." });
     }
 
     req.user = decodedUser;

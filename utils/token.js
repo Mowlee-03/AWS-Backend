@@ -25,7 +25,7 @@ const setAuthTokenCookie = (res, token) => {
           httpOnly: true, // Prevent access from JavaScript (mitigates XSS attacks)
           secure: process.env.NODE_ENV==="production",
           sameSite: "Strict", // Protect against CSRF
-          maxAge: 60 * 60 * 1000, 
+          maxAge: 24 * 60 * 60 * 1000, 
       });
     };
 

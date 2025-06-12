@@ -4,7 +4,7 @@ var router=express.Router()
 
 router.post("/create",createRole)
 router.get("/viewall",getAllRoles)
-router.put("/update/:id",updateRole)
+// router.put("/update/:id",updateRole)
 // router.delete("/delete/:id",deleteRole)
 
 
