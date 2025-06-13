@@ -1,8 +1,8 @@
-const jwt=require("jsonwebtoken")
+const jwt = require("jsonwebtoken")
 
-const generateToken = (payload) => {
+const generateToken = (payload,expiry) => {
     return jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRES_IN || '1h'
+      expiresIn:expiry || process.env.JWT_EXPIRES_IN || '1h'
     });
 };
 
@@ -20,12 +20,12 @@ const verifyToken = (token) => {
 };
 
 
-const setAuthTokenCookie = (res, token) => {   
-      res.cookie('authToken', token, {
+const setCookie = (res,name,token,expiry) => {   
+      res.cookie(name, token, {
           httpOnly: true, // Prevent access from JavaScript (mitigates XSS attacks)
           secure: process.env.NODE_ENV==="production",
           sameSite: "Strict", // Protect against CSRF
-          maxAge: 24 * 60 * 60 * 1000, 
+          maxAge: expiry||24 * 60 * 60 * 1000, 
       });
     };
 
@@ -42,5 +42,5 @@ const setAuthTokenCookie = (res, token) => {
   module.exports={
     generateToken,
     verifyToken,
-    setAuthTokenCookie
+    setCookie
   }
