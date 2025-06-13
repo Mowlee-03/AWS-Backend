@@ -12,15 +12,47 @@ const createUser = async (req, res) => {
     need_user_limit, sub_user_limit, status
   } = req.body;
 
-  const personRoleId = 1; // super admin
-  const personId = 1;
-
+  const personRoleId = req.user?.role_id; // super admin
+  const personId = req.user?.id;
+  if (!personId || !personRoleId) {
+    return res.status(403).json({
+      status:403,
+      message:"Unauthorised to create user"
+    })
+  }
   try {
     // Step 1: Basic validations
     if (!username || !email || !password || !mobile_number || !role_id) {
       return res.status(400).json({ status: 400, message: "Required fields missing" });
     }
-    
+
+    const isUserNameExist=await prisma.users.findUnique({
+      where:{username:username}
+    })
+    if (isUserNameExist) {
+      return res.status(409).json({
+        status:409,
+        message:"Username already exist ,try unique"
+      })
+    }
+    const isEmailExist=await prisma.users.findUnique({
+      where:{email:email}
+    })
+    if (isEmailExist) {
+      return res.status(409).json({
+        status:409,
+        message:"Email already exist ,try unique"
+      })
+    }
+    const isMobileNumberExist=await prisma.users.findUnique({
+      where:{mobile_number:mobile_number}
+    })
+    if (isMobileNumberExist) {
+      return res.status(409).json({
+        status:409,
+        message:"Mobile number already exist,try unique"
+      })
+    }
     // Step 2: Role-based validation
     if (personRoleId === 1) {
       if (role_id === 1 && isChild) {
@@ -129,12 +161,9 @@ const createUser = async (req, res) => {
   }
 };
 
-
-
-
-
-
-
+const loginWithEmail=async (req,res) => {
+  
+}
 
 
   module.exports ={
