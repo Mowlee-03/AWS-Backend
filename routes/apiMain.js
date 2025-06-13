@@ -11,7 +11,7 @@ const authMiddleware = require('../middleware/authMiddleware');
 
 
 router.use("/roles",authMiddleware,RoleRoute)
-router.use("/users",authMiddleware,UserRoute)
+router.use("/users",UserRoute)
 
 
 module.exports = router;
