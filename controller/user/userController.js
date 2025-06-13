@@ -13,7 +13,7 @@ const createUser = async (req, res) => {
     need_user_limit, sub_user_limit, status
   } = req.body;
 
-  const personRoleId = req.user?.role_id; // super admin
+  const personRoleId = req.user?.role_id; 
   const personId = req.user?.id;
   console.log(personId,personRoleId);
   
@@ -23,7 +23,7 @@ const createUser = async (req, res) => {
       message:"Forbidden to create user"
     })
   }
-  if (personRoleId!==1 || personRoleId!==2) {
+  if (personRoleId!==1 && personRoleId!==2) {
     return res.status(401).json({
       status:401,
       message:"You have not access to create user"
